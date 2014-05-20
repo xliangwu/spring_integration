@@ -4,14 +4,14 @@ import java.util.Timer;
 
 import org.junit.Test;
 
-import com.learn.spring.integration.file.monitor.StableFileNotifier;
+import com.learn.spring.integration.file.monitor.StableFileObserve;
 
 public class FileMonitorTest {
 
 	@Test
 	public void test() {
 		Timer timer = new Timer(true);
-		StableFileNotifier filerNotifier = new StableFileNotifier("C:\\data");
+		StableFileObserve filerNotifier = new StableFileObserve("C:\\data");
 		timer.schedule(filerNotifier, 10, 5000);
 		while (true) {
 			try {

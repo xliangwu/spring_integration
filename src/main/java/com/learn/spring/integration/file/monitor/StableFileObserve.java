@@ -1,21 +1,33 @@
 package com.learn.spring.integration.file.monitor;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.CollectionUtils;
 
-public class StableFileNotifier extends TimerTask {
+public class StableFileObserve extends TimerTask {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(StableFileNotifier.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(StableFileObserve.class);
 	private volatile File directory;
 	private Map<String, Long> modifiedTimeCache = new ConcurrentHashMap<String, Long>();
 
-	public StableFileNotifier(String file) {
+	private List<Listener<File>> observers;
+
+	public StableFileObserve(String file) {
 		this.directory = new File(file);
+	}
+
+	public void addObserver(Listener<File> e) {
+		if (observers == null)
+			observers = new ArrayList<Listener<File>>();
+
+		observers.add(e);
 	}
 
 	@Override
@@ -37,7 +49,12 @@ public class StableFileNotifier extends TimerTask {
 				modifiedTimeCache.put(key, file.lastModified());
 			} else {
 				// notify listener
-				LOGGER.debug("Size #" + key);
+				if (!CollectionUtils.isEmpty(observers)) {
+					for (Listener<File> listener : observers) {
+						listener.update(file, null);
+					}
+
+				}
 			}
 		}
 		LOGGER.debug("Size #" + listFiles.length);
